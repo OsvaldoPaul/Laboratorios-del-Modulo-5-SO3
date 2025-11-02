@@ -1,0 +1,179 @@
+-----------------------------
+        PRACTIA 1 
+-----------------------------
+
+
+-----------------------------
+     SERVIDOR PRIMARIO 
+-----------------------------
+
+mkdir luz                     # Crea una carpeta llamada luz
+cd luz/                       # Entra dentro de la carpeta luz
+touch rio{1..100}             # Crea 100 archivos vacíos (rio1, rio2, etc)
+ls                            # Lista los archivos dentro de la carpeta
+
+rsync -avz /home/OSVALDO20241589/luz/ OSVALDO20241589@192.168.1.17:/home/OSVALDO20241589/luna/
+                              # Sincroniza la carpeta luz hacia el servidor remoto
+
+nano lapiz.sh                 # Crea/edita un script con el comando nano
+sudo chmod 744 /home/OSVALDO20241589/luz/lapiz.sh
+                              # Asigna permisos para ejecutar el script
+
+touch PAPITO{1..15}           # Crea 15 archivos vacíos adicionales
+./lapiz.sh                    # Ejecuta manualmente el script
+
+crontab -e                    # Abre el editor de tareas programadas
+crontab -l                    # Muestra las tareas programadas activas
+
+touch kkkkkkk{1..100}         # Crea 100 archivos nuevos para probar el cron
+
+-----------------------------
+   SERVIDOR SECUNDARIO 
+-----------------------------
+
+mkdir luna                    # Crea la carpeta donde llegarán los archivos
+cd luna/                      # Entra a la carpeta luna
+sudo chmod u+w /home/OSVALDO20241589/luna
+                              # Da permiso de escritura al usuario
+sudo chown OSVALDO20241589:OSVALDO20241589 /home/OSVALDO20241589/luna
+                              # Cambia el dueño de la carpeta al usuario correcto
+ip a                          # Muestra las direcciones IP del equipo
+ls                            # Lista los archivos dentro de la carpeta
+
+
+
+-----------------------------
+       PRACTICA 2 
+-----------------------------
+
+sudo dnf config-manager --set-enabled highavailability
+# Habilita el repositorio de alta disponibilidad
+
+sudo dnf install pacemaker -y
+# Instala Pacemaker (motor del clúster)
+
+sudo firewall-cmd --permanent --add-service=high-availability
+# Permite servicios del clúster en el firewall
+
+sudo firewall-cmd --reload
+# Recarga las reglas del firewall
+
+sudo dnf install pcs -y
+# Instala PCS (administrador del clúster)
+
+sudo systemctl enable pcsd --now
+# Activa y arranca el servicio de control de PCS
+
+echo "123rio7778" | sudo passwd --stdin hacluster
+# Asigna contraseña al usuario de clúster
+
+sudo pcs host auth node1 addr=192.168.1.18 node2 addr=192.168.1.17 -u hacluster
+# Autentica ambos nodos para el clúster
+
+sudo pcs cluster setup pacemaker1 node1 addr=192.168.1.18 node2 addr=192.168.1.17
+# Configura el clúster y define sus nodos
+
+sudo pcs cluster start --all
+# Inicia el clúster en ambos nodos
+
+sudo systemctl start pacemaker.service
+# Inicia el servicio pacemaker en el sistema
+
+sudo pcs cluster enable --all
+# Habilita que el clúster arranque automáticamente
+
+sudo systemctl enable pacemaker.service
+# Habilita pacemaker para iniciar al encender
+
+sudo pcs property set stonith-enabled=false
+# Desactiva STONITH 
+
+sudo pcs resource create ClusterIP ocf:heartbeat:IPaddr2 ip=192.168.1.200 cidr_netmask=24 op monitor interval=30s
+# Crea la IP flotante que migrará entre nodos
+
+-----------------------------
+        PRACTICA 3 
+-----------------------------
+-----------------------------
+       PRACTICA 3
+-----------------------------
+
+sudo dnf install httpd -y
+# Instala el servidor web Apache
+
+cd /var/www/html/
+# Entra al directorio donde se aloja el index
+
+nano index.html
+# Crea/edita la página que mostrará qué servidor es
+
+systemctl start httpd
+# Inicia el servicio web
+
+systemctl status httpd
+# Verifica que Apache esté activo
+
+ip a
+# Obtiene las IP para probar en el navegador
+
+sudo dnf install keepalived -y
+# Instala Keepalived (manejador de IP flotante)
+
+cd /etc/keepalived/
+# Entra a la carpeta de configuración de Keepalived
+
+ls
+# Lista los archivos existentes
+
+rm -rf *
+# Elimina configuraciones por defecto que no se usarán
+
+ls
+# Verifica que la carpeta esté limpia
+
+nano keepalived.conf
+# Crea el archivo de configuración personalizado
+
+# ----- CONFIGURACIÓN SERVIDOR MASTER -----
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 51
+    priority 60
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass PS3
+    }
+    virtual_ipaddress {
+        192.168.1.200
+    }
+}
+
+# ----- CONFIGURACIÓN SERVIDOR BACKUP -----
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 51
+    priority 50
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass PS3
+    }
+    virtual_ipaddress {
+        192.168.1.200
+    }
+}
+
+systemctl start keepalived
+# Inicia el servicio que gestiona la IP flotante
+
+systemctl status keepalived
+# Verifica que el servicio esté activo
+
+ip a
+#
+
+
+
