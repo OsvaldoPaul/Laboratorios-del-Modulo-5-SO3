@@ -95,7 +95,7 @@ sudo pcs resource create ClusterIP ocf:heartbeat:IPaddr2 ip=192.168.1.200 cidr_n
         PRACTICA 3 
 -----------------------------
 -----------------------------
-       PRACTICA 3
+No pude entregar el video, pero estos son los comandos que iba a utilizar. Disculpe.
 -----------------------------
 
 sudo dnf install httpd -y
@@ -137,9 +137,9 @@ nano keepalived.conf
 # ----- CONFIGURACIÓN SERVIDOR MASTER -----
 vrrp_instance VI_1 {
     state MASTER
-    interface ens33
+    interface ens160
     virtual_router_id 51
-    priority 60
+    priority 100
     advert_int 1
     authentication {
         auth_type PASS
@@ -153,7 +153,7 @@ vrrp_instance VI_1 {
 # ----- CONFIGURACIÓN SERVIDOR BACKUP -----
 vrrp_instance VI_1 {
     state BACKUP
-    interface ens33
+    interface ens160
     virtual_router_id 51
     priority 50
     advert_int 1
